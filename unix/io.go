@@ -19,6 +19,7 @@ package unix
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net"
 	"os"
@@ -76,12 +77,17 @@ func NewServer(addr string, handler func(*net.UnixConn)) (*Server, error) {
 	return srv, nil
 }
 
+func (s *Server) Close() error { return s.listener.Close() }
+
 func (s *Server) run() {
 
 	// TODO: Handler stop-signals from main() thread.
 	for {
 		conn, err := s.listener.AcceptUnix()
 		if err != nil {
+			if errors.Is(err, net.ErrClosed) {
+				return
+			}
 			logrus.Errorf("Unable to establish connection (%v).", err)
 			return
 		}

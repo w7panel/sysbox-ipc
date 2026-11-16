@@ -45,6 +45,10 @@ message ContainerData {
   repeated string ProcRoPaths     = 9;
   repeated string ProcMaskPaths   = 10;
   string Netns                    = 11;
+  string CgroupData               = 12;
+  string Pidns                    = 13;
+  uint64 InitStartTime            = 14;
+  int64 ResourceCacheTtlNanos     = 15;
 }
 
 // Response message sent from sysbox-fs to runC process.

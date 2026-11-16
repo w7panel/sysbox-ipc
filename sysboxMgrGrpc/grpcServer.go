@@ -56,7 +56,8 @@ type ServerCallbacks struct {
 }
 
 type ServerStub struct {
-	cb *ServerCallbacks
+	cb     *ServerCallbacks
+	server *grpc.Server
 }
 
 func NewServerStub(cb *ServerCallbacks) *ServerStub {
@@ -73,7 +74,8 @@ func NewServerStub(cb *ServerCallbacks) *ServerStub {
 	}
 
 	return &ServerStub{
-		cb: cb,
+		cb:     cb,
+		server: grpc.NewServer(),
 	}
 }
 
@@ -88,7 +90,7 @@ func (s *ServerStub) Init() error {
 		return fmt.Errorf("failed to chmod %s: %v", sysMgrGrpcSockAddr, err)
 	}
 
-	grpcServer := grpc.NewServer()
+	grpcServer := s.server
 	pb.RegisterSysboxMgrStateChannelServer(grpcServer, s)
 	reflection.Register(grpcServer)
 
@@ -98,6 +100,8 @@ func (s *ServerStub) Init() error {
 
 	return nil
 }
+
+func (s *ServerStub) GracefulStop() { s.server.GracefulStop() }
 
 func (s *ServerStub) GetAddr() string {
 	return sysMgrGrpcSockAddr

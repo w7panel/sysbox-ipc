@@ -64,6 +64,7 @@ type Callback func(client interface{}, c *ContainerData) error
 type CallbacksMap = map[MessageType]Callback
 
 type Server struct {
+	server    *grpc.Server
 	Ctx       interface{}
 	Callbacks CallbacksMap
 	FuseMp    string
@@ -84,6 +85,7 @@ func NewServer(ctx interface{}, cb *CallbacksMap, fuseMp string) *Server {
 	}
 
 	newServer := &Server{
+		server:    grpc.NewServer(),
 		Ctx:       ctx,
 		Callbacks: make(map[MessageType]Callback),
 		FuseMp:    fuseMp,
@@ -108,7 +110,7 @@ func (s *Server) Init() error {
 	}
 
 	// Initializing grpc server
-	grpcServer := grpc.NewServer()
+	grpcServer := s.server
 	pb.RegisterSysboxStateChannelServer(grpcServer, s)
 
 	// Register reflection service on gRPC server.
@@ -196,3 +198,6 @@ func (s *Server) executeCallback(mtype MessageType,
 
 	return &pb.Response{Success: true}, nil
 }
+
+// Stop drains in-flight registrations before a restart checkpoint.
+func (s *Server) Stop() { s.server.GracefulStop() }

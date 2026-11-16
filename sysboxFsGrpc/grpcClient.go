@@ -34,17 +34,21 @@ var grpcTimeout time.Duration = 20 * time.Second
 
 // Container info passed by the client to the server across the grpc channel
 type ContainerData struct {
-	Id            string
-	Netns         string
-	InitPid       int32
-	Hostname      string
-	Ctime         time.Time
-	UidFirst      int32
-	UidSize       int32
-	GidFirst      int32
-	GidSize       int32
-	ProcRoPaths   []string
-	ProcMaskPaths []string
+	ResourceCacheTtlNanos int64
+	CgroupData            string
+	Pidns                 string
+	InitStartTime         uint64
+	Id                    string
+	Netns                 string
+	InitPid               int32
+	Hostname              string
+	Ctime                 time.Time
+	UidFirst              int32
+	UidSize               int32
+	GidFirst              int32
+	GidSize               int32
+	ProcRoPaths           []string
+	ProcMaskPaths         []string
 }
 
 func unixConnect(addr string, t time.Duration) (net.Conn, error) {
@@ -53,9 +57,7 @@ func unixConnect(addr string, t time.Duration) (net.Conn, error) {
 	return conn, err
 }
 
-//
 // Establishes grpc connection to sysbox-fs' remote-end.
-//
 func connect() (*grpc.ClientConn, error) {
 	// Set up a connection to the server.
 	// TODO: Secure me through TLS.
@@ -77,16 +79,20 @@ func containerDataToPbData(data *ContainerData) (*pb.ContainerData, error) {
 	}
 
 	return &pb.ContainerData{
-		Id:            data.Id,
-		Netns:         data.Netns,
-		InitPid:       data.InitPid,
-		Ctime:         pbTime,
-		UidFirst:      data.UidFirst,
-		UidSize:       data.UidSize,
-		GidFirst:      data.GidFirst,
-		GidSize:       data.GidSize,
-		ProcRoPaths:   data.ProcRoPaths,
-		ProcMaskPaths: data.ProcMaskPaths,
+		Id:                    data.Id,
+		ResourceCacheTtlNanos: data.ResourceCacheTtlNanos,
+		CgroupData:            data.CgroupData,
+		Pidns:                 data.Pidns,
+		InitStartTime:         data.InitStartTime,
+		Netns:                 data.Netns,
+		InitPid:               data.InitPid,
+		Ctime:                 pbTime,
+		UidFirst:              data.UidFirst,
+		UidSize:               data.UidSize,
+		GidFirst:              data.GidFirst,
+		GidSize:               data.GidSize,
+		ProcRoPaths:           data.ProcRoPaths,
+		ProcMaskPaths:         data.ProcMaskPaths,
 	}, nil
 }
 
@@ -97,24 +103,26 @@ func pbDatatoContainerData(pbdata *pb.ContainerData) (*ContainerData, error) {
 	}
 
 	return &ContainerData{
-		Id:            pbdata.Id,
-		Netns:         pbdata.Netns,
-		InitPid:       pbdata.InitPid,
-		Ctime:         cTime,
-		UidFirst:      pbdata.UidFirst,
-		UidSize:       pbdata.UidSize,
-		GidFirst:      pbdata.GidFirst,
-		GidSize:       pbdata.GidSize,
-		ProcRoPaths:   pbdata.ProcRoPaths,
-		ProcMaskPaths: pbdata.ProcMaskPaths,
+		Id:                    pbdata.Id,
+		ResourceCacheTtlNanos: pbdata.ResourceCacheTtlNanos,
+		CgroupData:            pbdata.CgroupData,
+		Pidns:                 pbdata.Pidns,
+		InitStartTime:         pbdata.InitStartTime,
+		Netns:                 pbdata.Netns,
+		InitPid:               pbdata.InitPid,
+		Ctime:                 cTime,
+		UidFirst:              pbdata.UidFirst,
+		UidSize:               pbdata.UidSize,
+		GidFirst:              pbdata.GidFirst,
+		GidSize:               pbdata.GidSize,
+		ProcRoPaths:           pbdata.ProcRoPaths,
+		ProcMaskPaths:         pbdata.ProcMaskPaths,
 	}, nil
 }
 
-//
 // Pre-registers container creation in sysbox-fs. Notice that this
 // is a blocking call that can potentially have a minor impact
 // on container's boot-up speed.
-//
 func SendContainerPreRegistration(data *ContainerData) (err error) {
 	// Set up sysbox-fs pipeline.
 	conn, err := connect()
@@ -143,9 +151,7 @@ func SendContainerPreRegistration(data *ContainerData) (err error) {
 	return nil
 }
 
-//
 // Registers container creation in sysbox-fs.
-//
 func SendContainerRegistration(data *ContainerData) (err error) {
 	// Set up sysbox-fs pipeline.
 	conn, err := connect()
@@ -174,9 +180,7 @@ func SendContainerRegistration(data *ContainerData) (err error) {
 	return nil
 }
 
-//
 // Unregisters container from sysbox-fs.
-//
 func SendContainerUnregistration(data *ContainerData) (err error) {
 	// Set up sysbox-fs pipeline.
 	conn, err := connect()
@@ -203,12 +207,10 @@ func SendContainerUnregistration(data *ContainerData) (err error) {
 	return nil
 }
 
-//
 // Sends a container-update message to sysbox-fs end. At this point, we are
 // only utilizing this message for a particular case, update the container
 // creation-time attribute, but this function can serve more general purposes
 // in the future.
-//
 func SendContainerUpdate(data *ContainerData) (err error) {
 	// Set up sysbox-fs pipeline.
 	conn, err := connect()
