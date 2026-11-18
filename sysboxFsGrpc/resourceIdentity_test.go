@@ -11,7 +11,7 @@ import (
 func TestResourceIdentityRoundTrip(t *testing.T) {
 	for _, input := range []ContainerData{
 		{Id: "legacy", Ctime: time.Unix(123, 0)},
-		{Id: "seeded", Ctime: time.Unix(123, 0), CgroupData: "0::/containers/test\n", Pidns: "pid:[123]", InitStartTime: 456, ResourceCacheTtlNanos: int64(25 * time.Millisecond)},
+		{Id: "seeded", Ctime: time.Unix(123, 0), CgroupData: "0::/containers/test\n", Pidns: "pid:[123]", InitStartTime: 456},
 	} {
 		wire, err := containerDataToPbData(&input)
 		if err != nil {
@@ -29,7 +29,7 @@ func TestResourceIdentityRoundTrip(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if got.Id != input.Id || got.CgroupData != input.CgroupData || got.Pidns != input.Pidns || got.InitStartTime != input.InitStartTime || got.ResourceCacheTtlNanos != input.ResourceCacheTtlNanos {
+		if got.Id != input.Id || got.CgroupData != input.CgroupData || got.Pidns != input.Pidns || got.InitStartTime != input.InitStartTime {
 			t.Fatalf("round trip: %#v, want %#v", got, input)
 		}
 	}

@@ -34,21 +34,20 @@ var grpcTimeout time.Duration = 20 * time.Second
 
 // Container info passed by the client to the server across the grpc channel
 type ContainerData struct {
-	ResourceCacheTtlNanos int64
-	CgroupData            string
-	Pidns                 string
-	InitStartTime         uint64
-	Id                    string
-	Netns                 string
-	InitPid               int32
-	Hostname              string
-	Ctime                 time.Time
-	UidFirst              int32
-	UidSize               int32
-	GidFirst              int32
-	GidSize               int32
-	ProcRoPaths           []string
-	ProcMaskPaths         []string
+	CgroupData    string
+	Pidns         string
+	InitStartTime uint64
+	Id            string
+	Netns         string
+	InitPid       int32
+	Hostname      string
+	Ctime         time.Time
+	UidFirst      int32
+	UidSize       int32
+	GidFirst      int32
+	GidSize       int32
+	ProcRoPaths   []string
+	ProcMaskPaths []string
 }
 
 func unixConnect(addr string, t time.Duration) (net.Conn, error) {
@@ -79,20 +78,19 @@ func containerDataToPbData(data *ContainerData) (*pb.ContainerData, error) {
 	}
 
 	return &pb.ContainerData{
-		Id:                    data.Id,
-		ResourceCacheTtlNanos: data.ResourceCacheTtlNanos,
-		CgroupData:            data.CgroupData,
-		Pidns:                 data.Pidns,
-		InitStartTime:         data.InitStartTime,
-		Netns:                 data.Netns,
-		InitPid:               data.InitPid,
-		Ctime:                 pbTime,
-		UidFirst:              data.UidFirst,
-		UidSize:               data.UidSize,
-		GidFirst:              data.GidFirst,
-		GidSize:               data.GidSize,
-		ProcRoPaths:           data.ProcRoPaths,
-		ProcMaskPaths:         data.ProcMaskPaths,
+		Id:            data.Id,
+		CgroupData:    data.CgroupData,
+		Pidns:         data.Pidns,
+		InitStartTime: data.InitStartTime,
+		Netns:         data.Netns,
+		InitPid:       data.InitPid,
+		Ctime:         pbTime,
+		UidFirst:      data.UidFirst,
+		UidSize:       data.UidSize,
+		GidFirst:      data.GidFirst,
+		GidSize:       data.GidSize,
+		ProcRoPaths:   data.ProcRoPaths,
+		ProcMaskPaths: data.ProcMaskPaths,
 	}, nil
 }
 
@@ -103,20 +101,19 @@ func pbDatatoContainerData(pbdata *pb.ContainerData) (*ContainerData, error) {
 	}
 
 	return &ContainerData{
-		Id:                    pbdata.Id,
-		ResourceCacheTtlNanos: pbdata.ResourceCacheTtlNanos,
-		CgroupData:            pbdata.CgroupData,
-		Pidns:                 pbdata.Pidns,
-		InitStartTime:         pbdata.InitStartTime,
-		Netns:                 pbdata.Netns,
-		InitPid:               pbdata.InitPid,
-		Ctime:                 cTime,
-		UidFirst:              pbdata.UidFirst,
-		UidSize:               pbdata.UidSize,
-		GidFirst:              pbdata.GidFirst,
-		GidSize:               pbdata.GidSize,
-		ProcRoPaths:           pbdata.ProcRoPaths,
-		ProcMaskPaths:         pbdata.ProcMaskPaths,
+		Id:            pbdata.Id,
+		CgroupData:    pbdata.CgroupData,
+		Pidns:         pbdata.Pidns,
+		InitStartTime: pbdata.InitStartTime,
+		Netns:         pbdata.Netns,
+		InitPid:       pbdata.InitPid,
+		Ctime:         cTime,
+		UidFirst:      pbdata.UidFirst,
+		UidSize:       pbdata.UidSize,
+		GidFirst:      pbdata.GidFirst,
+		GidSize:       pbdata.GidSize,
+		ProcRoPaths:   pbdata.ProcRoPaths,
+		ProcMaskPaths: pbdata.ProcMaskPaths,
 	}, nil
 }
 

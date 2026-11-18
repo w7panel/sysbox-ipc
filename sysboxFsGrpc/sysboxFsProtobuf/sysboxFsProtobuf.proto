@@ -48,7 +48,7 @@ message ContainerData {
   string CgroupData               = 12;
   string Pidns                    = 13;
   uint64 InitStartTime            = 14;
-  int64 ResourceCacheTtlNanos     = 15;
+  reserved 15;
 }
 
 // Response message sent from sysbox-fs to runC process.
